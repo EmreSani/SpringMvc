@@ -1,15 +1,13 @@
 package com.tpe.controller;
 
 import com.tpe.domain.Student;
+import com.tpe.exception.StudentNotFoundException;
 import com.tpe.service.IStudentService;
 import com.tpe.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
@@ -86,12 +84,36 @@ public class StudentController {
     //3-mevcut öğrenciyi güncelleme
     //http://localhost:8080/SpringMvc/students/update?id=1 + GET
 
+    @GetMapping("/update")
+    public ModelAndView sendFormForUpdate(@RequestParam("id") Long identity){//1
+
+        Student foundStudent=service.findStudentById(identity);
+
+        ModelAndView mav=new ModelAndView();
+        mav.addObject("student",foundStudent);
+        mav.setViewName("studentForm");
+        return mav;
+    }
+
+
+
     //4-mevcut öğrenciyi silme
     //http://localhost:8080/SpringMvc/students/delete/1 + GET
+    @GetMapping("/delete/{id}")
+    public String deleteStudent(@PathVariable("id") Long identity){
 
+        service.deleteStudent(identity);
+        return "redirect:/students";
 
+    }
 
-
-
+    // @ExceptionHandler:try-catch bloğu mantığıyla benzer çalışır
+    @ExceptionHandler(StudentNotFoundException.class)
+    public ModelAndView handleException(Exception ex){
+        ModelAndView mav=new ModelAndView();
+        mav.addObject("message",ex.getMessage());
+        mav.setViewName("notFound");
+        return mav;
+    }
 
 }
